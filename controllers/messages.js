@@ -1,9 +1,10 @@
 const Messages = require('../config/relations').messages; // Messages model imported
 const httpStatus = require('http-status');
 const crypto = require('crypto');
+const encryptKey = require('../config/config').encrypt_key;
 
 let encrypt = (text) => {
-    let key = config.secret;
+    let key = encryptKey;
     let algorithm = 'aes-128-cbc';
     let cipher = crypto.createCipher(algorithm, key);
     let encryptedText = cipher.update(text, 'utf8', 'hex');
@@ -12,7 +13,7 @@ let encrypt = (text) => {
 }
 
 let decrypt = (text) => {
-    let key = config.secret;
+    let key = encryptKey;
     let algorithm = 'aes-128-cbc';
     let decipher = crypto.createDecipher(algorithm, key);
     let decryptedText = decipher.update(text, 'hex', 'utf8');
@@ -73,6 +74,30 @@ exports.getMessagesOfSenderAndReceiver = async (req, res, next) => {
         })
 
         res.status(httpStatus.OK).json({ user1sendedmessages: senderUser1MessagesArr, user2sendedmessages: senderUser2MessagesArr })
+
+    } catch (error) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Please try again ...', error })
+    }
+}
+
+exports.updateAMessage = (req, res, next) => {
+    try {
+        const message = req.body;
+
+        message.text = encrypt(message.text);
+
+        Messages.update({ message: message.text }, {
+            returning: true,
+            where: {
+                messageId: message.messageId
+            }
+        })
+            .then(([rowUpdated], [messageUpdated]) => {
+                res.status(httpStatus.CREATED).json({ message: 'Message created successfully', message: messageUpdated });
+            })
+            .catch(error => {
+                res.status(httpStatus.UNPROCESSABLE_ENTITY).json({ message: 'Message updation error', error });
+            })
 
     } catch (error) {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Please try again ...', error })
