@@ -80,6 +80,7 @@ exports.getMessagesOfSenderAndReceiver = async (req, res, next) => {
     }
 }
 
+// send text and messageId to this api in request 
 exports.updateAMessage = (req, res, next) => {
     try {
         const message = req.body;

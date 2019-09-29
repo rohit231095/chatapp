@@ -8,5 +8,6 @@ router.get('/login', userController.userLogin);
 router.post('/createUser', userController.createUser);
 router.post('/sendMessage', messageController.createMessage);
 router.get('/messages', messageController.getMessagesOfSenderAndReceiver);
+router.put('/updateAMessage', messageController.updateAMessage);
 
 module.exports = router;
